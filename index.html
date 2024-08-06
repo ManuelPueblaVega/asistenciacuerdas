@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Lista de Asistencia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #estudiante-form, #lista-estudiantes, #enviar-form {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Asistencia del Curso</h1>
+    
+    <div id="estudiante-form">
+        <input type="text" id="nombre-estudiante" placeholder="Nombre del estudiante">
+        <button onclick="agregarEstudiante()">Agregar Estudiante</button>
+    </div>
+    
+    <div id="lista-estudiantes">
+        <table id="tabla-estudiantes">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Asistencia</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <div id="resumen">
+        <h2>Resumen de Asistencia</h2>
+        <p>Total de estudiantes: <span id="total-estudiantes">0</span></p>
+        <p>Estudiantes presentes: <span id="estudiantes-presentes">0</span></p>
+    </div>
+
+    <div id="enviar-form">
+        <input type="email" id="correo-destino" placeholder="Tu correo electrónico">
+        <button onclick="enviarPorCorreo()">Enviar Lista por Correo</button>
+    </div>
+
+    <script>
+        let estudiantes = [
+            "AMALIA BELEN AGUIRRE MUÑOZ",
+            "JORNI RUBEN CERDA RIQUELME",
+            "SEBASTIAN ALEJANDRO MELLADO MELLADO",
+            "FABIAN ALEXANDER QUEZADA CASTILLO",
+            "GASPAR ESTEBAN RIQUELME ECHEVERRÍA",
+            "JOAQUÍN ELSON SEPÚLVEDA CORNEJO",
+            "VICENTE NABIH VALLEJOS MIRANDA",
+            "MÁXIMO ALEJANDRO VELÁSQUEZ HORMAZÁBAL",
+            "VICENTE MANUEL CARTES CERF",
+            "MARIO FRANCISCO LUBONES JIMENEZ",
+            "MAXIMILIANO ESTEBAN RIVERO FUENTEALBA",
+            "JUSTIN BENJAMÍN TAPIA SILVA",
+            "ESTEBAN CÉSAR GONZÁLEZ REBOLLEDO",
+            "ILLAIR IGNACIO IBARRA AGUILAR",
+            "ENGERLI DARIEL NAVARRO ROJAS",
+            "AXEL NICOLAS NIETO NECULÑIR",
+            "MARTÍN ALONSO RODRÍGUEZ CÁDIZ",
+            "MATIAS IGNACIO RUBIO RIVADERA",
+            "ISABELLA ARIANNA JARA CASTILLO",
+            "ANTONELLA TRINIDAD MORALES NAVEA",
+            "MAITE VALENTINA QUEUPU VALENZUELA",
+            "LUKAS SAID SILVA YÁÑEZ",
+            "JAVIER ISRAEL CABRERA VELÁSQUEZ",
+            "AYELEN ANAÍ CALDERON SOSA",
+            "TRINIDAD ELENA CATALÁN TORRES",
+            "JULIO ANTONIO LLANCABIL MANQUEL",
+            "MARCO ANTONIO MORENO ESPINOZA",
+            "MATÍAS FELIPE QUEZADA MATURANA",
+            "CRISTIAN ANTONIO ROJAS REYES",
+            "BENJAMÍN ESTEBAN ABARCA FIGUEROA",
+            "VICENTE CRISTÓBAL CUEVAS ARELLANO",
+            "ISIDORA VALENTINA DONOSO SAVARIA",
+            "PIERO ANDRÉS ESPINOZA FUENTES",
+            "MAILY ANTONIA FIGUEROA QUELOPANA",
+            "TRINIDAD CAROLINA FUENTES ZAVALA",
+            "MAYRA AYLEN GALLARDO ARANCIBIA",
+            "MARTÍN CLAUDIO IGNACIO PAILAMILLA SAN MARTÍN",
+            "ALEJANDRA POLETT RICOUZ ALARCÓN",
+            "AGUSTINA PAZ DE LOURDES ROJAS RAMÍREZ",
+            "ISIDORA ANTONELLA VALENZUELA NOCETTI",
+            "VALENTINA ANTONIA ÁLVAREZ HUENUQUEO",
+            "CÉSAR ANÍBAL COFRÉ SOTO",
+            "LUKAS AGUSTÍN VILLANUEVA ALARCÓN"
+        ].map(nombre => ({ nombre, presente: false }));
+
+        function agregarEstudiante() {
+            const nombreInput = document.getElementById('nombre-estudiante');
+            const nombre = nombreInput.value.trim();
+            
+            if (nombre) {
+                estudiantes.push({ nombre, presente: false });
+                nombreInput.value = '';
+                actualizarTabla();
+                actualizarResumen();
+            }
+        }
+
+        function toggleAsistencia(index) {
+            estudiantes[index].presente = !estudiantes[index].presente;
+            actualizarTabla();
+            actualizarResumen();
+        }
+
+        function actualizarTabla() {
+            const tbody = document.querySelector('#tabla-estudiantes tbody');
+            tbody.innerHTML = '';
+            
+            estudiantes.forEach((estudiante, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${estudiante.nombre}</td>
+                    <td>
+                        <input type="checkbox" ${estudiante.presente ? 'checked' : ''} 
+                               onchange="toggleAsistencia(${index})">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function actualizarResumen() {
+            document.getElementById('total-estudiantes').textContent = estudiantes.length;
+            document.getElementById('estudiantes-presentes').textContent = 
+                estudiantes.filter(e => e.presente).length;
+        }
+
+        function enviarPorCorreo() {
+            const correoDestino = document.getElementById('correo-destino').value.trim();
+            if (!correoDestino) {
+                alert('Por favor, ingresa una dirección de correo válida.');
+                return;
+            }
+
+            const fecha = new Date().toLocaleDateString();
+            const asunto = encodeURIComponent(`Lista de Asistencia - ${fecha}`);
+            let cuerpo = `Lista de Asistencia - ${fecha}%0D%0A%0D%0A`;
+
+            estudiantes.forEach(estudiante => {
+                cuerpo += `${estudiante.nombre}: ${estudiante.presente ? 'Presente' : 'Ausente'}%0D%0A`;
+            });
+
+            cuerpo += `%0D%0ATotal de estudiantes: ${estudiantes.length}%0D%0A`;
+            cuerpo += `Estudiantes presentes: ${estudiantes.filter(e => e.presente).length}`;
+
+            const mailtoLink = `mailto:${correoDestino}?subject=${asunto}&body=${cuerpo}`;
+            window.location.href = mailtoLink;
+        }
+
+        // Inicializar la tabla y el resumen al cargar la página
+        window.onload = function() {
+            actualizarTabla();
+            actualizarResumen();
+        };
+    </script>
+</body>
+</html>
